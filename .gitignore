@@ -1,0 +1,14 @@
+node_modules/
+yarn-error.log
+miniprogram/
+.DS_Store
+.history/
+yarn.lock
+.idea/
+package-lock.json
+pnpm-lock.yaml
+/env
+*.zip
+dist
+.vscode
+
