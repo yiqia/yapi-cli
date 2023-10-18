@@ -30,8 +30,8 @@ export async function readJsonFile(pathStr) {
 export async function readConfig() {
   let config = {};
   try {
-    config = await import(`${cwd}/yapi-cli-config.js`);
-  } catch (_err) {
+    config = await import(`${cwd}/yapi-cli-config.mjs`);
+  } catch (err) {
     consola.error("没有配置文件，请先执行：yapi-cli init");
     return;
   }

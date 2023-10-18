@@ -9,9 +9,9 @@ export function init() {
   try {
     const configPath = path.resolve(
       __dirname,
-      "../../constants/yapi-cli-config.js"
+      "../../constants/yapi-cli-config.mjs"
     );
-    copySync(configPath, cwd + "/yapi-cli-config.js");
+    copySync(configPath, cwd + "/yapi-cli-config.mjs");
     consola.success("成功");
   } catch (err) {
     consola.error(err);
