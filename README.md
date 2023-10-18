@@ -50,7 +50,7 @@ yt init
 
 统一创建ts文件执行
 ```shell
-yt create
+yt create -all
 ```
 
 只创建单个文件执行
