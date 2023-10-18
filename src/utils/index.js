@@ -1,27 +1,50 @@
-import { readJsonSync, outputFile, ensureFileSync } from "fs-extra/esm";
+import { readJsonSync, outputFile, pathExists } from "fs-extra/esm";
 import consola from "consola";
+import path from "path";
 
 const cwd = process.cwd();
+const currentModuleUrl = import.meta.url;
+const __dirname = new URL(currentModuleUrl).pathname;
+
+// 检查配置信息是否完善
+export function checkConfig(config) {
+  const { cookie, outPath, url, projectId } = config;
+  if (!cookie || !outPath || !url || !projectId) {
+    consola.error("请检查配置信息是否填写完成");
+    return;
+  }
+  return true;
+}
+
+// 读取文件
+export async function readJsonFile(pathStr) {
+  try {
+    return await readJsonSync(path.resolve(__dirname, "../../../", pathStr));
+  } catch (err) {
+    consola.error("读取json文件失败");
+  }
+  return;
+}
 
 // 读取配置文件
-export function readConfig() {
+export async function readConfig() {
   let config = {};
   try {
-    config = readJsonSync(`${cwd}/yapi-cli-config.json`);
+    config = await import(`${cwd}/yapi-cli-config.js`);
   } catch (_err) {
     consola.error("没有配置文件，请先执行：yapi-cli init");
     return;
   }
-  return config;
+  return config.default;
 }
 
 // 根据目录和内容创建文件
 export async function createFile(path, content) {
   try {
-    if (ensureFileSync(path)) {
-      await outputFile(path, content);
-    } else {
+    if (await pathExists(path)) {
       consola.log(`文件已创建: ${path}`);
+    } else {
+      await outputFile(path, content);
     }
   } catch (err) {
     consola.error(`创建文件时出错: ${err}`);
@@ -68,18 +91,21 @@ export function queryToTs(arr, name) {
 
 // 转换types名
 export function convertString(str, add) {
-  const parts = str.split("/");
-  let result = "";
+  try {
+    const parts = str.split("/");
+    let result = "";
 
-  for (let i = 0; i < parts.length; i++) {
-    if (i === 0 || parts[i] === "") continue;
-    const words = parts[i].split("_");
-    for (const word of words) {
-      result += word.charAt(0).toUpperCase() + word.slice(1);
+    for (let i = 0; i < parts.length; i++) {
+      if (i === 0 || parts[i] === "") continue;
+      const words = parts[i].split("_");
+      for (const word of words) {
+        result += word.charAt(0).toUpperCase() + word.slice(1);
+      }
     }
+    return result + add + "Types";
+  } catch (err) {
+    consola.error("转换types名失败", str);
   }
-
-  return result + add + "Types";
 }
 
 // 删除不需要的ref字段

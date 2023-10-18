@@ -11,4 +11,4 @@ pnpm-lock.yaml
 *.zip
 dist
 .vscode
-
+bin/yapi-cli-config.js

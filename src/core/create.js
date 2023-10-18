@@ -11,6 +11,7 @@ import {
   convertName,
   removeText,
   queryToTs,
+  checkConfig,
 } from "../utils/index.js";
 
 const cwd = process.cwd();
@@ -18,18 +19,20 @@ const cwd = process.cwd();
 let config = {};
 
 const headers = {
-  Cookie: config.cookie,
   "Content-Type": "application/json",
 };
 
 export async function create(options) {
-  config = readConfig();
+  config = await readConfig();
+  headers.Cookie = config.cookie;
+  // consola.log("config", config);
+  if (!checkConfig(config)) return;
   if (options.id) {
-    consola.log("id", options.id);
+    consola.info("开始下载id：", options.id);
     const info = await getApiInfo(options.id);
     await downloadTypes(info);
     return;
-  } else {
+  } else if (options.all) {
     const list = await readApiList();
     for (let i = 0; i < list.length; i++) {
       const item = list[i];
@@ -40,22 +43,34 @@ export async function create(options) {
 }
 
 const downloadTypes = async (info) => {
-  consola.log("info.res_body", info.res_body);
-  const resBody = info.res_body
-    ? JSON.parse(info.res_body).properties.data || {}
-    : {};
-  const reqBody = info.req_body_other ? JSON.parse(info.req_body_other) : {};
-  const resBodyTypeName = convertString(info.path, "Res");
-  const reqBodyTypeName = convertString(info.path, "Req");
-  const reqQueryType = queryToTs(
-    info.req_query || [],
-    convertString(info.path, "ReqQuery")
-  );
-  const resBodyTypes = await jsonSchemaToTs(resBody, resBodyTypeName);
-  const reqBodyTypes = await jsonSchemaToTs(reqBody, reqBodyTypeName);
-  const method = METHOD_TO_IMPORT[info.method];
-  const apiName = convertName(info.path);
-  const str = `${method}
+  try {
+    const resBody = info.res_body
+      ? JSON.parse(info.res_body).properties.data || {}
+      : {};
+    const reqBody = info.req_body_other ? JSON.parse(info.req_body_other) : {};
+    const resBodyTypeName = convertString(info.path, "Res");
+    const reqBodyTypeName = convertString(info.path, "Req");
+    const reqQueryType = queryToTs(
+      info.req_query || [],
+      convertString(info.path, "ReqQuery")
+    );
+
+    const resBodyTypes = await jsonSchemaToTs(resBody, resBodyTypeName);
+    const reqBodyTypes = await jsonSchemaToTs(reqBody, reqBodyTypeName);
+    const method = METHOD_TO_IMPORT[info.method];
+    const apiName = convertName(info.path);
+
+    const apiContent = `/**
+* 标题: ${info.title}
+* 描述: ${info.desc}
+* 地址：${config.url}/project/${config.projectId}/interface/api/${info._id}
+*/
+export const ${apiName} = (data?: ${reqBodyTypeName}) =>
+  ${String(info.method).toLowerCase()}<${resBodyTypeName}>("/api${
+      info.path
+    }", data);`;
+
+    const str = `${config.headers ? config.headers(info) : method}
 
 ${reqQueryType}
 
@@ -63,17 +78,14 @@ ${reqBodyTypes}
 
 ${resBodyTypes}
 
-/**
- * 标题: ${info.title}
- * 描述: ${info.desc}
- * 地址：${config.url}/project/${config.projectId}/interface/api/${info._id}
- */
-export const ${apiName} = (data?: ${reqBodyTypeName}) =>
-  ${String(info.method).toLowerCase()}<${resBodyTypeName}>("/api${
-    info.path
-  }", data);
+${config.apiContent ? config.apiContent() : apiContent}
   `;
-  await createFile(cwd + config.path + info.path + ".ts", str);
+    const createFilePath = cwd + config.outPath + info.path + ".ts";
+    await createFile(createFilePath, str);
+    consola.success("下载成功", createFilePath);
+  } catch (err) {
+    consola.error("下载失败", info ? info._id : "");
+  }
 };
 
 // JSON Schema 转换为 TypeScript
@@ -86,18 +98,19 @@ async function jsonSchemaToTs(schema, name) {
 // 读取api信息
 export async function getApiInfo(id) {
   const url = `${config.url}/api/interface/get?id=${id}`;
+  consola.info("下载url", url);
   try {
     const response = await axios.get(url, {
       headers: headers,
     });
+    // consola.log(response.data);
     if (response.data && response.data.data) {
       return response.data.data;
     } else {
-      consola.error("不存在api信息");
+      consola.error("获取数据失败", response.data);
     }
   } catch (error) {
     consola.error("读取api信息失败");
-    consola.error(error);
   }
 }
 

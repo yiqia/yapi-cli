@@ -1,6 +1,6 @@
 {
   "name": "yapi-cli",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -9,16 +9,15 @@
   "type": "module",
   "bin": "./bin/index.js",
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "yiqia",
+  "homepage": "https://github.com/yiqia/yapi-cli",
+  "license": "MIT",
   "dependencies": {
     "@inquirer/prompts": "^3.2.0",
     "axios": "^1.5.1",
     "commander": "^11.0.0",
     "consola": "^3.2.3",
-    "fs-extra": "^11.1.1"
-  },
-  "devDependencies": {
+    "fs-extra": "^11.1.1",
     "json-schema-to-typescript": "^13.1.1"
   }
 }
