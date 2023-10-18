@@ -12,3 +12,4 @@ pnpm-lock.yaml
 dist
 .vscode
 bin/yapi-cli-config.js
+bin/src/*/**

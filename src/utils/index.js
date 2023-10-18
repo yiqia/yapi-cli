@@ -1,10 +1,15 @@
 import { readJsonSync, outputFile, pathExists } from "fs-extra/esm";
 import consola from "consola";
 import path from "path";
+import os from "os";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const cwd = process.cwd();
-const currentModuleUrl = import.meta.url;
-const __dirname = new URL(currentModuleUrl).pathname;
+const cwd = process.cwd().replace(/\\/g, "/");
+
+consola.log("__filename", __filename);
+consola.log("__dirname", __dirname);
 
 // 检查配置信息是否完善
 export function checkConfig(config) {
@@ -19,7 +24,8 @@ export function checkConfig(config) {
 // 读取文件
 export async function readJsonFile(pathStr) {
   try {
-    return await readJsonSync(path.resolve(__dirname, "../../../", pathStr));
+    consola.log(path.resolve(__dirname, "../../", pathStr));
+    return await readJsonSync(path.resolve(__dirname, "../../", pathStr));
   } catch (err) {
     consola.error("读取json文件失败");
   }
@@ -30,9 +36,16 @@ export async function readJsonFile(pathStr) {
 export async function readConfig() {
   let config = {};
   try {
-    config = await import(`${cwd}/yapi-cli-config.mjs`);
+    consola.log("path", `${cwd}/yapi-cli-config.mjs`);
+    // 判断系统环境
+    if (os.platform() === "win32") {
+      config = await import(`file://${cwd}\\yapi-cli-config.mjs`);
+    } else {
+      config = await import(`${cwd}/yapi-cli-config.mjs`);
+    }
+    consola.log('configs',config)
   } catch (err) {
-    consola.error("没有配置文件，请先执行：yapi-cli init");
+    consola.error("没有配置文件，请先执行：yapi-cli init",err);
     return;
   }
   return config.default;

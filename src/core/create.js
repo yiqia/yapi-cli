@@ -24,6 +24,7 @@ const headers = {
 
 export async function create(options) {
   config = await readConfig();
+  consola.log("config", config);
   headers.Cookie = config.cookie;
   // consola.log("config", config);
   if (!checkConfig(config)) return;
