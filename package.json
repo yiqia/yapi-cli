@@ -1,5 +1,5 @@
 {
-  "name": "yapi-cli",
+  "name": "yapi-ts-cli",
   "version": "0.0.4",
   "description": "",
   "main": "index.js",
@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "type": "module",
-  "bin": "./bin/index.js",
+  "bin": {
+    "yt": "./bin/index.js"
+  },
   "keywords": [],
   "author": "yiqia",
   "homepage": "https://github.com/yiqia/yapi-cli",

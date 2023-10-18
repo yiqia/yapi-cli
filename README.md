@@ -1,19 +1,19 @@
-## yapi-cli脚手架使用
+## yapi-ts-cli脚手架使用
 
 ### 安装
 
 推荐全局安装
 
 ```sh
-npm i -g yapi-cli
+npm i -g yapi-ts-cli
 ```
 
 ### 查看帮助
 
 ```js
-yapi-cli -h
+yt -h
 // or
-yapi-cli --help
+yt --help
 
 ```js
 /**
@@ -34,7 +34,7 @@ Commands:
 首先初始化配置执行
 
 ```shell
-yapi-cli init
+yt init
 ```
 
 修改配置信息
@@ -50,10 +50,10 @@ yapi-cli init
 
 统一创建ts文件执行
 ```shell
-yapi-cli create
+yt create
 ```
 
 只创建单个文件执行
 ```shell
-yapi-cli create -id <id>
+yt create -id <id>
 ```
